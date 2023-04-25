@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/components/progress"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/components/progress"
 	"time"
 )
 
 func main() {
 	cnt := 10
-
+	
 	group := progress.NewGroupWithCount(10).
 		AppendRunner(func(progress *components.Progress) func() {
 			total := cnt
 			cnt += 1
-
+			
 			progress.WithTotal(int64(total)).
 				//WithDisableCostView().
 				//WithTitleView(func() string {
@@ -26,30 +26,30 @@ func main() {
 				//	return fmt.Sprintf(" %d/%d", current, total)
 				//}).
 				WithDefaultGradient()
-
+			
 			return func() {
-
+				
 				if progress.Id == 3 {
 					progress.Done()
 				}
-
+				
 				for i := 0; i < total+1; i++ {
 					progress.IncrOne()
 					sleep()
 				}
-
+				
 				for i := 0; i < total; i++ {
 					progress.DecrOne()
 					sleep()
 				}
-
+				
 				for i := 0; i < total+1; i++ {
 					progress.IncrOne()
 					sleep()
 				}
 			}
 		})
-
+	
 	group.Display()
 }
 

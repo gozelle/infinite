@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/style"
 	"strconv"
 )
 
@@ -15,7 +15,7 @@ func main() {
 		fmt.Print(style.New().Bg(color.New(i - 1)).Render(pad(i - 1)))
 	}
 	fmt.Println()
-
+	
 	fmt.Println(style.New().Fg(color.Magenta).Render("Magenta"))
 	fmt.Println(style.New().Fg(color.Red).Render("Red"))
 	fmt.Println(style.New().Fg(color.LightBlue).Render("LightBlue"))
@@ -41,6 +41,6 @@ func pad(i int) string {
 	if i < 100 {
 		return strconv.Itoa(i) + " "
 	}
-
+	
 	return strconv.Itoa(i)
 }

@@ -3,8 +3,8 @@ package progress
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
 	"sort"
 )
 
@@ -44,12 +44,12 @@ func NewGroupWithCount(progressCnt int) *Group {
 	if progressCnt <= 0 {
 		return nil
 	}
-
+	
 	var progressList []*components.Progress
 	for i := 0; i < progressCnt; i++ {
 		progressList = append(progressList, components.NewProgress())
 	}
-
+	
 	return NewGroup(progressList...)
 }
 
@@ -58,7 +58,7 @@ func NewGroup(progressList ...*components.Progress) *Group {
 	if len(progressList) <= 0 {
 		return nil
 	}
-
+	
 	m := make(map[int]*progressUpdater)
 	var ids []int
 	for _, progress := range progressList {
@@ -67,13 +67,13 @@ func NewGroup(progressList ...*components.Progress) *Group {
 		}
 		ids = append(ids, progress.Id)
 	}
-
+	
 	sort.Ints(ids)
-
+	
 	group := &Group{m: m, ids: ids, Quit: components.InterruptKey}
 	startUp := components.NewStartUp(group)
 	group.startUp = startUp
-
+	
 	return group
 }
 
@@ -134,7 +134,7 @@ func (g *Group) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			updater.progress.Update(msg)
 		})
 	}
-
+	
 	return g, nil
 }
 
@@ -142,13 +142,13 @@ func (g *Group) View() string {
 	if g.shouldOutputDoneView() {
 		return g.doneView() + strx.NewLine
 	}
-
+	
 	sb := strx.NewFluent()
-
+	
 	g.foreach(func(updater *progressUpdater) {
 		sb.Write(updater.progress.View()).NewLine()
 	})
-
+	
 	return sb.String()
 }
 

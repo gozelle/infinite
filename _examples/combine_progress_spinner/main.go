@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
 	"time"
 )
 
@@ -13,20 +13,20 @@ func main() {
 	spinner := components.NewSpinner()
 	spinner.Prompt = strx.Space + spinner.Prompt
 	progress := components.NewProgress().WithTotal(int64(total))
-
+	
 	NewComponent(spinner, progress).Display(func(c *Component) {
 		sleep()
-
+		
 		for i := 0; i < total+1; i++ {
 			progress.IncrOne()
 			sleep()
 		}
-
+		
 		for i := 0; i < total; i++ {
 			progress.DecrOne()
 			sleep()
 		}
-
+		
 		for i := 0; i < total+1; i++ {
 			progress.IncrOne()
 			sleep()
@@ -49,19 +49,19 @@ func (c *Component) Display(runner func(c *Component)) error {
 	if runner == nil {
 		return errors.New("runner is null")
 	}
-
+	
 	go func() {
 		runner(c)
 		c.progress.Done()
 		c.Quit()
 	}()
-
+	
 	_, err := c.Run()
 	return err
 }
 
 func (c *Component) Init() tea.Cmd {
-
+	
 	return tea.Batch(c.spinner.Init(), c.progress.Init())
 }
 
@@ -75,7 +75,7 @@ func (c *Component) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	_, c1 := c.spinner.Update(msg)
 	_, c2 := c.progress.Update(msg)
-
+	
 	return c, tea.Batch(c1, c2)
 }
 

@@ -2,8 +2,8 @@
 <h1>infinite</h1>
 <span> 用于开发交互式 CLI(tui,terminal) 程序的组件库.</span>
 <br>
-<a href="https://goreportcard.com/report/github.com/fzdwx/infinite"><img src="https://goreportcard.com/badge/github.com/fzdwx/infinite" alt="go report card"></a>
-<a href="https://github.com/fzdwx/infinite/releases"><img src="https://img.shields.io/github/v/release/fzdwx/infinite.svg?style=flat-square" alt="release"></a>
+<a href="https://goreportcard.com/report/github.com/gozelle/infinite"><img src="https://goreportcard.com/badge/github.com/gozelle/infinite" alt="go report card"></a>
+<a href="https://github.com/gozelle/infinite/releases"><img src="https://img.shields.io/github/v/release/fzdwx/infinite.svg?style=flat-square" alt="release"></a>
 </div>
 <img src="https://user-images.githubusercontent.com/65269574/184916069-076a0f6a-70bd-49e1-b7d7-0d2e7fc5c6bb.gif" alt="demo">
 
@@ -21,7 +21,7 @@
 - 跨平台
 - 可定制,你可以替换组件中的某些选项或方法为你自己的实现
     - 通过修改 `multi select`
-      的 [某些选项](https://github.com/fzdwx/infinite/blob/main/components/selection/singleselect/single_select.go#L49)
+      的 [某些选项](https://github.com/gozelle/infinite/blob/main/components/selection/singleselect/single_select.go#L49)
       实现 `single select`
 - 可组合,你可以将一个或多个基础组件联合在一起使用
     - `autocomplete` 通过 `input` 来实现输入接收，通过 `selection` 来实现待选项的选择.
@@ -30,7 +30,7 @@
 ## Install
 
 ```shell
-go get github.com/fzdwx/infinite
+go get github.com/gozelle/infinite
 ```
 
 ## Getting started

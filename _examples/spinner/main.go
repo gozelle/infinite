@@ -1,9 +1,9 @@
 package main
 
 import (
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/components/spinner"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/components/spinner"
 	"time"
 )
 
@@ -16,9 +16,9 @@ func main() {
 			time.Sleep(time.Millisecond * 100)
 			spinner.Refreshf("hello world %d", i)
 		}
-
+		
 		spinner.Finish("finish")
-
+		
 		spinner.Refresh("is finish?")
 	})
 }

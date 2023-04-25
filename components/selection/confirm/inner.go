@@ -4,8 +4,8 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
 	"strings"
 )
 
@@ -15,7 +15,7 @@ type inner struct {
 	selection *components.Selection
 	help      help.Model
 	ShowHelp  bool
-
+	
 	focusPrompt     string
 	unFocusPrompt   string
 	focusInterval   string
@@ -38,19 +38,19 @@ func newInner(selection *components.Selection) *inner {
 
 func (i *inner) Init() tea.Cmd {
 	cmd := i.selection.Init()
-
+	
 	if i.DefaultVal {
 		cmd = tea.Batch(cmd, func() tea.Msg {
 			return switchIt(1)
 		})
 	}
-
+	
 	return cmd
 }
 
 func (i *inner) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-
+	
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, i.keyMap.Switch):
@@ -64,7 +64,7 @@ func (i *inner) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case switchIt:
 		i.switchIt()
 	}
-
+	
 	return i, nil
 }
 
@@ -74,15 +74,15 @@ func (i *inner) View() string {
 		Write(i.prompt()).
 		Write(i.interval()).
 		Write(rows[1]).Space().Write("/").Space().Write(rows[2])
-
+	
 	if i.ShowHelp {
 		row.NewLine().Write(i.help.View(i.keyMap))
 	}
-
+	
 	if i.outputResult {
 		row.NewLine()
 	}
-
+	
 	return row.String()
 }
 
@@ -92,7 +92,7 @@ func (i *inner) SetProgram(program *tea.Program) {
 
 func (i *inner) switchIt() {
 	var msg tea.Msg
-
+	
 	if i.Value {
 		msg = tea.KeyMsg{
 			Type: tea.KeyUp,
@@ -100,7 +100,7 @@ func (i *inner) switchIt() {
 	} else {
 		msg = tea.KeyMsg{Type: tea.KeyDown}
 	}
-
+	
 	i.Value = !i.Value
 	i.selection.Update(msg)
 }

@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/components/progress"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/components/progress"
 	"net/http"
 	"os"
 	"path"
@@ -26,17 +26,17 @@ func main() {
 				return func() {}
 			}
 			pro.WithTotal(resp.ContentLength)
-
+			
 			return func() {
 				defer resp.Body.Close()
-
+				
 				dest, err := os.OpenFile(path.Base(url), os.O_CREATE|os.O_WRONLY, 0o777)
 				defer dest.Close()
 				if err != nil {
 					pro.Println("dest open error", err)
 					return
 				}
-
+				
 				_, err = progress.StartTransfer(resp.Body, dest, pro)
 				if err != nil {
 					pro.Println("trans error", err)

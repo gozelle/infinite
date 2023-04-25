@@ -1,7 +1,7 @@
 package confirm
 
 import (
-	"github.com/fzdwx/infinite/components"
+	"github.com/gozelle/infinite/components"
 )
 
 type Confirm struct {
@@ -10,16 +10,16 @@ type Confirm struct {
 }
 
 func New(ops ...Option) *Confirm {
-
+	
 	i := newInner()
-
+	
 	c := &Confirm{
 		inner:   i,
 		startUp: components.NewStartUp(i),
 	}
-
+	
 	c.Apply(ops...)
-
+	
 	return c
 }
 

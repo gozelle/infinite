@@ -2,9 +2,9 @@ package confirm
 
 import (
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
 )
 
 type KeyMap struct {
@@ -28,27 +28,27 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 type Confirm struct {
 	startUp *components.StartUp
 	inner   *inner
-
+	
 	KeyMap       KeyMap
 	Yes          string
 	No           string
 	OutputResult bool
 	DefaultVal   bool
 	ShowHelp     bool
-
+	
 	FocusSymbol     string
 	UnFocusSymbol   string
 	FocusInterval   string
 	UnFocusInterval string
 	Prompt          string
-
+	
 	FocusSymbolStyle     *style.Style
 	UnFocusSymbolStyle   *style.Style
 	FocusIntervalStyle   *style.Style
 	UnFocusIntervalStyle *style.Style
 	PromptStyle          *style.Style
 	ChoiceStyle          *style.Style
-
+	
 	ops []Option
 }
 
@@ -62,7 +62,7 @@ func WithSelection(ops ...Option) *Confirm {
 		DefaultVal:   false,
 		ShowHelp:     true,
 		ops:          ops,
-
+		
 		FocusSymbol:          FocusSymbol,
 		UnFocusSymbol:        UnFocusSymbol,
 		FocusInterval:        FocusInterval,
@@ -83,9 +83,9 @@ func (c *Confirm) Display() (bool, error) {
 	for _, op := range c.ops {
 		op(c)
 	}
-
+	
 	c.init()
-
+	
 	c.startUp = components.NewStartUp(c.inner)
 	_, err := c.startUp.Run()
 	return c.inner.Value, err

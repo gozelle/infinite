@@ -1,7 +1,7 @@
 package progress
 
 import (
-	"github.com/fzdwx/infinite/components"
+	"github.com/gozelle/infinite/components"
 	"io"
 )
 
@@ -14,7 +14,7 @@ type Transfer struct {
 func (t Transfer) Write(bytes []byte) (n int, err error) {
 	amount := len(bytes)
 	t.progress.Incr(int64(amount))
-
+	
 	return amount, nil
 }
 

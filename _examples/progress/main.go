@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/fzdwx/infinite/components"
+	"github.com/gozelle/infinite/components"
 	"time"
 )
 
@@ -17,9 +17,9 @@ func main() {
 		WithPercentAgeFunc(func(total int64, current int64, percent float64) string {
 			return fmt.Sprintf(" %d/%d", current, total)
 		})
-
+	
 	startUp := components.NewStartUp(progress)
-
+	
 	go func() {
 		for i := 0; i < 100; i++ {
 			sleep()
@@ -28,25 +28,25 @@ func main() {
 	}()
 	go func() {
 		sleep()
-
+		
 		for i := 0; i < total+1; i++ {
 			progress.IncrOne()
 			sleep()
 		}
-
+		
 		for i := 0; i < total; i++ {
 			progress.DecrOne()
 			sleep()
 		}
-
+		
 		for i := 0; i < total+1; i++ {
 			progress.IncrOne()
 			sleep()
 		}
-
+		
 		startUp.Quit()
 	}()
-
+	
 	startUp.Run()
 }
 

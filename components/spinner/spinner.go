@@ -3,7 +3,7 @@ package spinner
 import (
 	"errors"
 	"fmt"
-	"github.com/fzdwx/infinite/components"
+	"github.com/gozelle/infinite/components"
 )
 
 type Spinner struct {
@@ -23,11 +23,11 @@ func New(ops ...Option) *Spinner {
 		inner:   inner,
 		startUp: components.NewStartUp(inner),
 	}
-
+	
 	s.PrintHelper = inner.PrintHelper
-
+	
 	s.Apply(ops...)
-
+	
 	return s
 }
 
@@ -46,12 +46,12 @@ func (s *Spinner) Display(runner func(spinner *Spinner)) error {
 	if runner == nil {
 		return spinnerRunnerIsRequired
 	}
-
+	
 	go func() {
 		runner(s)
 		s.Finish()
 	}()
-
+	
 	_, err := s.startUp.Run()
 	return err
 }

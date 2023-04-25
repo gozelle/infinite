@@ -1,10 +1,10 @@
 package text
 
 import (
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 )
 
 type Text struct {
@@ -15,9 +15,9 @@ type Text struct {
 
 func New(ops ...Option) *Text {
 	inner := components.NewInput()
-
+	
 	i := &Text{inner: inner, startUp: components.NewStartUp(inner), pure: false}
-
+	
 	i.inner.FocusSymbol = theme.DefaultTheme.FocusSymbol
 	i.inner.UnFocusSymbol = theme.DefaultTheme.UnFocusSymbol
 	i.inner.FocusInterval = theme.DefaultTheme.FocusInterval
@@ -26,9 +26,9 @@ func New(ops ...Option) *Text {
 	i.inner.UnFocusSymbolStyle = theme.DefaultTheme.UnFocusSymbolStyle
 	i.inner.FocusIntervalStyle = theme.DefaultTheme.FocusIntervalStyle
 	i.inner.UnFocusIntervalStyle = theme.DefaultTheme.UnFocusIntervalStyle
-
+	
 	i.Apply(ops...)
-
+	
 	if i.pure {
 		i.inner.FocusSymbol = strx.Empty
 		i.inner.UnFocusSymbol = strx.Empty
@@ -44,7 +44,7 @@ func New(ops ...Option) *Text {
 		i.inner.DefaultValueStyle = components.InputDefaultPlaceholderStyle
 		i.inner.CursorStyle = components.InputDefaultCursorStyle
 	}
-
+	
 	return i
 }
 
@@ -60,11 +60,11 @@ func (i *Text) Apply(ops ...Option) *Text {
 
 func (i *Text) Display() (string, error) {
 	_, err := i.startUp.Run()
-
+	
 	if err == nil {
 		return i.Value(), nil
 	}
-
+	
 	return strx.Empty, err
 }
 

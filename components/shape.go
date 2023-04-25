@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/fzdwx/infinite/emoji"
+	"github.com/gozelle/infinite/emoji"
 	"time"
 )
 

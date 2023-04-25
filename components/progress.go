@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/muesli/reflow/ansi"
 	"math"
@@ -18,7 +18,7 @@ import (
 var (
 	lastID int
 	idMtx  sync.Mutex
-
+	
 	ProgressDefaultTotal           int64 = 100
 	ProgressDefaultCurrent         int64 = 0
 	ProgressDefaultPercentAgeFunc        = DefaultPercentAgeFunc
@@ -185,40 +185,40 @@ type Progress struct {
 	// Current / Total
 	percent    float64
 	prevAmount int64
-
+	
 	// kill program
 	Quit key.Binding
 	// Total width of the progress bar, including percentage, if set.
 	Width int
-
+	
 	// "Filled" sections of the progress bar.
 	Full      rune
 	FullColor string
-
+	
 	// "Empty" sections of progress bar.
 	Empty      rune
 	EmptyColor string
-
+	
 	ShowPercentage  bool
 	PercentAgeFunc  func(total, current int64, percent float64) string
 	PercentAgeStyle *style.Style
-
+	
 	ShowCost      bool
 	CostView      func(cost time.Duration, total, current, prevAmount int64) string
 	start         time.Time
 	end           time.Time
 	TickCostDelay time.Duration
-
+	
 	done     bool
 	DoneView func() string
-
+	
 	TitleView func(done bool) string
-
+	
 	// Gradient settings
 	useRamp    bool
 	rampColorA colorful.Color
 	rampColorB colorful.Color
-
+	
 	// When true, we scale the gradient to fit the width of the filled section
 	// of the progress bar. When false, the width of the gradient will be set
 	// to the full width of the progress bar.
@@ -274,18 +274,18 @@ func (pro *Progress) Cost() time.Duration {
 
 func (pro *Progress) Init() tea.Cmd {
 	var cmd tea.Cmd
-
+	
 	if pro.ShowCost {
 		pro.start = time.Now()
 		cmd = tick
 	}
-
+	
 	return cmd
 }
 
 func (pro *Progress) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
+	
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -308,7 +308,7 @@ func (pro *Progress) View() string {
 	if pro.shouldOutputDoneView() {
 		return pro.DoneView()
 	}
-
+	
 	return pro.ViewAs(pro.percent, pro.end, pro.done)
 }
 
@@ -318,12 +318,12 @@ func (pro *Progress) ViewAs(percent float64, now time.Time, done bool) string {
 	costView := pro.viewCost(now)
 	title := pro.viewTitle(done)
 	otherLen := ansi.PrintableRuneWidth(title + percentage + costView)
-
+	
 	fluent.Write(title)
 	pro.barView(fluent, percent, otherLen)
 	fluent.Write(percentage)
 	fluent.Write(costView)
-
+	
 	return fluent.String()
 }
 
@@ -333,9 +333,9 @@ func (pro *Progress) barView(b *strx.FluentStringBuilder, percent float64, textW
 		fw = int(math.Round(float64(tw) * percent)) // filled width
 		p  float64
 	)
-
+	
 	fw = max(0, min(tw, fw))
-
+	
 	if pro.useRamp {
 		// Gradient fill
 		for i := 0; i < fw; i++ {
@@ -344,9 +344,9 @@ func (pro *Progress) barView(b *strx.FluentStringBuilder, percent float64, textW
 			} else {
 				p = float64(i) / float64(tw)
 			}
-
+			
 			c := pro.rampColorA.BlendLuv(pro.rampColorB, p).Hex()
-
+			
 			b.Write(style.New().Fg(color.NewHex(c)).Render(string(pro.Full)))
 		}
 	} else {
@@ -355,7 +355,7 @@ func (pro *Progress) barView(b *strx.FluentStringBuilder, percent float64, textW
 		s := style.New().Fg(color.NewHex(pro.FullColor)).Render(rep)
 		b.Write(s)
 	}
-
+	
 	// Empty fill
 	rep := strings.Repeat(string(pro.Empty), max(0, tw-fw))
 	e := style.New().Fg(color.NewHex(pro.EmptyColor)).Render(rep)
@@ -368,7 +368,7 @@ func (pro *Progress) setRamp(colorA, colorB string, scaled bool) {
 	// ignoring the error for sake of usability.
 	a, _ := colorful.Hex(colorA)
 	b, _ := colorful.Hex(colorB)
-
+	
 	pro.useRamp = true
 	pro.scaleRamp = scaled
 	pro.rampColorA = a
@@ -378,17 +378,17 @@ func (pro *Progress) setRamp(colorA, colorB string, scaled bool) {
 func (pro *Progress) refresh(msg ProgressMsg) {
 	pro.Current += msg.Amount
 	pro.prevAmount = msg.Amount
-
+	
 	if pro.Current < 0 {
 		pro.Current = 0
 	}
-
+	
 	if pro.Current > pro.Total {
 		pro.Current = pro.Total
 	}
-
+	
 	pro.percent = float64(pro.Current) / float64(pro.Total)
-
+	
 	// refresh cost
 	if pro.ShowCost {
 		pro.end = time.Now()
@@ -399,7 +399,7 @@ func (pro *Progress) viewPercentage(percent float64) string {
 	if !pro.ShowPercentage {
 		return strx.Empty
 	}
-
+	
 	return pro.PercentAgeStyle.Render(pro.PercentAgeFunc(pro.Total, pro.Current, percent))
 }
 
@@ -415,7 +415,7 @@ func (pro *Progress) viewTitle(done bool) string {
 	if pro.TitleView == nil {
 		return strx.Empty
 	}
-
+	
 	return pro.TitleView(done)
 }
 

@@ -4,8 +4,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/duke-git/lancet/v2/slice"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 )
 
 type (
@@ -21,7 +21,7 @@ type (
 	*/
 	Components interface {
 		tea.Model
-
+		
 		// SetProgram this method will be called back when the tea.Program starts.
 		// please keep passing this method
 		SetProgram(program *tea.Program)
@@ -97,17 +97,17 @@ func NewProgress() *Progress {
 		TickCostDelay:   ProgressDefaultTickCostDelay,
 		Quit:            InterruptKey,
 	}
-
+	
 	return p
 }
 
 // NewSelection constructor
 func NewSelection(choices []string) *Selection {
-
+	
 	items := slice.Map[string, SelectionItem](choices, func(idx int, item string) SelectionItem {
 		return SelectionItem{idx, item}
 	})
-
+	
 	c := &Selection{
 		Choices:              items,
 		Selected:             make(map[int]struct{}),
@@ -141,7 +141,7 @@ func NewSelection(choices []string) *Selection {
 		ValueStyle:           theme.DefaultTheme.ChoiceTextStyle.Underline(),
 		status:               Normal,
 	}
-
+	
 	return c
 }
 

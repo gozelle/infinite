@@ -1,8 +1,8 @@
 package multiselect
 
 import (
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/style"
 )
 
 // Option the option of Select

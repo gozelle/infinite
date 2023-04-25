@@ -2,8 +2,8 @@ package theme
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/style"
 )
 
 type Theme struct {
@@ -14,12 +14,12 @@ type Theme struct {
 	UnHintSymbolStyle            *style.Style
 	SpinnerShapeStyle            *style.Style
 	PlaceholderStyle             *style.Style
-
+	
 	FocusSymbol     string
 	UnFocusSymbol   string
 	FocusInterval   string
 	UnFocusInterval string
-
+	
 	FocusSymbolStyle     *style.Style
 	UnFocusSymbolStyle   *style.Style
 	FocusIntervalStyle   *style.Style
@@ -44,8 +44,8 @@ var (
 		FocusIntervalStyle:           style.New().Fg(color.Gray),
 		UnFocusIntervalStyle:         style.New().Fg(color.Gray).Bold(),
 	}
-
-	// fix https://github.com/fzdwx/infinite/issues/5
+	
+	// fix https://github.com/gozelle/infinite/issues/5
 	_ = DefaultTheme.PromptStyle.Render("123")
 	_ = DefaultTheme.MultiSelectedHintSymbolStyle.Render("123")
 	_ = DefaultTheme.ChoiceTextStyle.Render("123")

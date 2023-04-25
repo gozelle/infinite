@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/components/selection/confirm"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/components/selection/confirm"
 )
 
 func main() {
-
+	
 	val, _ := inf.NewConfirmWithSelection(
 		//confirm.WithDisableOutputResult(),
 		//confirm.WithDisableShowHelp(),
 		confirm.WithDefaultYes(),
 	).Display()
-
+	
 	if val {
 		fmt.Println("yes, you are.")
 	} else {

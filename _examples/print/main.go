@@ -1,13 +1,13 @@
 package main
 
 import (
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/components/spinner"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/components/spinner"
 	"time"
 )
 
 func main() {
-
+	
 	inf.NewSpinner(spinner.WithPrompt(" Loading...")).
 		Display(func(spinner *spinner.Spinner) {
 			go func() {

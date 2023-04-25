@@ -2,23 +2,23 @@ package confirm
 
 import (
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 )
 
 var (
 	Yes      = "Yes"
 	No       = "No"
 	ShowHelp = true
-
+	
 	FocusSymbol     = theme.DefaultTheme.FocusSymbol
 	UnFocusSymbol   = theme.DefaultTheme.UnFocusSymbol
 	FocusInterval   = theme.DefaultTheme.FocusInterval
 	UnFocusInterval = theme.DefaultTheme.UnFocusInterval
 	Prompt          = "Are you handsome?"
-
+	
 	FocusSymbolStyle     = theme.DefaultTheme.FocusSymbolStyle
 	UnFocusSymbolStyle   = theme.DefaultTheme.UnFocusSymbolStyle
 	FocusIntervalStyle   = theme.DefaultTheme.FocusIntervalStyle

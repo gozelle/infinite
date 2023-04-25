@@ -1,13 +1,13 @@
 package infinite
 
 import (
-	"github.com/fzdwx/infinite/components/input/confirm"
-	"github.com/fzdwx/infinite/components/input/text"
-	"github.com/fzdwx/infinite/components/progress"
-	cs "github.com/fzdwx/infinite/components/selection/confirm"
-	"github.com/fzdwx/infinite/components/selection/multiselect"
-	"github.com/fzdwx/infinite/components/selection/singleselect"
-	"github.com/fzdwx/infinite/components/spinner"
+	"github.com/gozelle/infinite/components/input/confirm"
+	"github.com/gozelle/infinite/components/input/text"
+	"github.com/gozelle/infinite/components/progress"
+	cs "github.com/gozelle/infinite/components/selection/confirm"
+	"github.com/gozelle/infinite/components/selection/multiselect"
+	"github.com/gozelle/infinite/components/selection/singleselect"
+	"github.com/gozelle/infinite/components/spinner"
 )
 
 // NewMultiSelect new multi select

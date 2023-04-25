@@ -1,18 +1,18 @@
 package strx
 
 import (
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/style"
 	"strings"
 )
 
 type (
-
+	
 	// FluentStringBuilder is strings.Builder wrapper,
 	// but its api is fluent.
 	FluentStringBuilder struct {
 		sb strings.Builder
 	}
-
+	
 	WriteFunc func(fluent *FluentStringBuilder)
 )
 
@@ -62,11 +62,11 @@ func (b *FluentStringBuilder) WithSlice(slice []string, mapper func(idx int, ite
 	if len(slice) == 0 {
 		return nil
 	}
-
+	
 	for i, s := range slice {
 		b.Write(mapper(i, s))
 	}
-
+	
 	return b
 }
 
@@ -81,7 +81,7 @@ func (b *FluentStringBuilder) Style(style *style.Style, val string) *FluentStrin
 	if len(val) == 0 {
 		return b
 	}
-
+	
 	b.Write(style.Render(val))
 	return b
 }

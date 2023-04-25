@@ -4,17 +4,17 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 )
 
 // inner is confirm impl
 type inner struct {
 	input   *components.Input
 	program *tea.Program
-
+	
 	// the KeyMap of Confirm
 	KeyMap KeyMap
 	Help   help.Model
@@ -24,7 +24,7 @@ type inner struct {
 	Value       bool
 	Notice      string
 	NoticeStyle *style.Style
-
+	
 	FocusSymbol          string
 	UnFocusSymbol        string
 	FocusInterval        string
@@ -36,7 +36,7 @@ type inner struct {
 	PromptStyle          *style.Style
 	ValueStyle           *style.Style
 	OutputResult         bool
-
+	
 	status components.Status
 }
 
@@ -62,9 +62,9 @@ func newInner() *inner {
 		status:               components.Normal,
 		OutputResult:         true,
 	}
-
+	
 	i.input.Prompt = "Are you handsome?"
-
+	
 	return i
 }
 
@@ -76,26 +76,26 @@ func (i *inner) Init() tea.Cmd {
 		Style(i.NoticeStyle, i.Notice).
 		Style(i.FocusIntervalStyle, i.FocusInterval).
 		String()
-
+	
 	unFocusPrompt := strx.NewFluent().
 		Style(i.UnFocusSymbolStyle, i.UnFocusSymbol).
 		Style(i.PromptStyle, i.input.Prompt).
 		Style(i.NoticeStyle, i.Notice).
 		Style(i.UnFocusIntervalStyle, i.UnFocusInterval[:len(i.UnFocusInterval)-1]).
 		String()
-
+	
 	i.input.OutputResult = false
 	i.input.Init()
-
+	
 	i.input.Model.Prompt = focusPrompt
 	i.input.UnFocusPrompt = unFocusPrompt
-
+	
 	return components.FocusCmd
 }
 
 func (i *inner) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msgCast := msg.(type) {
-
+	
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msgCast, i.KeyMap.Quit):
@@ -111,7 +111,7 @@ func (i *inner) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			msg = nil
 		}
 	}
-
+	
 	_, cmd := i.input.Update(msg)
 	return i, cmd
 }
@@ -120,21 +120,21 @@ func (i *inner) View() string {
 	if components.IsFinish(i.status) && !i.OutputResult {
 		return strx.Empty
 	}
-
+	
 	builder := strx.NewFluent().Write(i.input.View())
-
+	
 	if components.IsFinish(i.status) {
 		builder.Style(i.ValueStyle, strx.BoolMapYesOrNo(i.Value))
 	}
-
+	
 	if !i.DisplayHelp {
 		builder.NewLine().Write(i.Help.View(i.KeyMap))
 	}
-
+	
 	if components.IsFinish(i.status) && i.OutputResult {
 		builder.NewLine()
 	}
-
+	
 	return builder.String()
 }
 

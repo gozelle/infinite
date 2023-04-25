@@ -8,10 +8,10 @@ import (
 	"github.com/duke-git/lancet/v2/mathutil"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/duke-git/lancet/v2/strutil"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 	"github.com/mattn/go-runewidth"
 	"github.com/sahilm/fuzzy"
 	"sort"
@@ -124,42 +124,42 @@ type Selection struct {
 	// currently valid option
 	currentChoices []SelectionItem
 	program        *tea.Program
-
+	
 	Choices []SelectionItem
-
+	
 	Validators       []Validator
 	validatorsErrMsg []string
 	// how many options to display at a time
 	PageSize            int
 	DisableOutPutResult bool
-
+	
 	// key binding
 	Keymap SelectionKeyMap
 	// key Help text
 	Help     help.Model
 	ShowHelp bool
-
+	
 	Prompt         string
 	Header         string
 	CursorSymbol   string
 	UnCursorSymbol string
 	HintSymbol     string
 	UnHintSymbol   string
-
+	
 	PromptStyle       *style.Style
 	CursorSymbolStyle *style.Style
 	HintSymbolStyle   *style.Style
 	UnHintSymbolStyle *style.Style
 	ChoiceTextStyle   *style.Style
-
+	
 	// RowRender output options
 	// CursorSymbol,HintSymbol,choice
 	RowRender func(CursorSymbol string, HintSymbol string, choice string) string
-
+	
 	EnableFilter bool
 	FilterInput  *Input
 	FilterFunc   func(input string, items []SelectionItem) []SelectionItem
-
+	
 	FocusSymbol          string
 	UnFocusSymbol        string
 	FocusInterval        string
@@ -169,7 +169,7 @@ type Selection struct {
 	FocusIntervalStyle   *style.Style
 	UnFocusIntervalStyle *style.Style
 	ValueStyle           *style.Style
-
+	
 	status Status
 }
 
@@ -181,10 +181,10 @@ func DefaultFilterFunc(input string, items []SelectionItem) []SelectionItem {
 	choiceVals := slice.Map[SelectionItem, string](items, func(index int, item SelectionItem) string {
 		return item.Val
 	})
-
+	
 	var ranks = fuzzy.Find(input, choiceVals)
 	sort.Stable(ranks)
-
+	
 	return slice.Map[fuzzy.Match, SelectionItem](ranks, func(index int, item fuzzy.Match) SelectionItem {
 		return items[item.Index]
 	})
@@ -192,36 +192,36 @@ func DefaultFilterFunc(input string, items []SelectionItem) []SelectionItem {
 
 func (s *Selection) Init() tea.Cmd {
 	var cmd tea.Cmd
-
+	
 	s.refreshChoices()
-
+	
 	s.UnCursorSymbol = strutil.PadEnd("", runewidth.StringWidth(s.CursorSymbol), " ")
-
+	
 	if s.shouldFilter() {
 		cmd = s.FilterInput.Init()
 	}
-
+	
 	return cmd
 }
 
 func (s *Selection) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	shouldSkipFiler := false
-
+	
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-
+		
 		// 关于为什么不用 switch, 为了适配单选的key 和 choice 和 confirm 这两个key要相同.
-
+		
 		if key.Matches(msg, s.Keymap.Up) {
 			s.moveUp()
 			shouldSkipFiler = true
 		}
-
+		
 		if key.Matches(msg, s.Keymap.Down) {
 			s.moveDown()
 			shouldSkipFiler = true
 		}
-
+		
 		if key.Matches(msg, s.Keymap.NextPage) {
 			for i := 0; i < s.PageSize; i++ {
 				s.moveDown()
@@ -236,7 +236,7 @@ func (s *Selection) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			shouldSkipFiler = true
 		}
-
+		
 		if key.Matches(msg, s.Keymap.Choice) {
 			s.choice()
 			shouldSkipFiler = true
@@ -249,7 +249,7 @@ func (s *Selection) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			s.flip()
 			shouldSkipFiler = true
 		}
-
+		
 		if key.Matches(msg, s.Keymap.Confirm) {
 			for _, v := range s.Validators {
 				err := v(s.Value())
@@ -260,21 +260,21 @@ func (s *Selection) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if len(s.validatorsErrMsg) == 0 {
 				return s.finish()
 			}
-
+			
 			shouldSkipFiler = true
 		}
-
+		
 		if key.Matches(msg, s.Keymap.Quit) {
 			s.unselectAll()
 			return s, tea.Quit
 		}
-
+		
 		if !shouldSkipFiler && s.shouldFilter() {
 			_, cmd := s.FilterInput.Update(msg)
 			s.moveToTop()
 			return s, cmd
 		}
-
+	
 	case Status:
 		if s.shouldFilter() {
 			_, cmd := s.FilterInput.Update(msg)
@@ -288,9 +288,9 @@ func (s *Selection) View() string {
 	if IsFinish(s.status) {
 		return s.viewResult()
 	}
-
+	
 	msg := s.promptLine()
-
+	
 	if s.shouldShowValidatorsErrMsg() {
 		for _, errMsg := range s.validatorsErrMsg {
 			msg.NewLine().Style(
@@ -300,40 +300,40 @@ func (s *Selection) View() string {
 			s.clearValidatorsErrMsg()
 		}
 	}
-
+	
 	if s.shouldFilter() {
 		msg.NewLine().Write(s.FilterInput.View())
 	}
-
+	
 	if s.Header != "" {
 		msg.NewLine().Write(s.Header)
 	}
-
+	
 	// Iterate over our Choices
 	for i, choice := range s.currentChoices {
 		val := choice.Val
-
+		
 		// Is the CursorSymbol pointing at this choice?
 		cursorSymbol := s.UnCursorSymbol // no CursorSymbol
 		if s.cursor == i {
 			cursorSymbol = s.CursorSymbol // CursorSymbol!
 			val = s.ChoiceTextStyle.Render(val)
 		}
-
+		
 		// Is this choice Selected?
 		hintSymbol := s.UnHintSymbol // not Selected
 		if _, ok := s.Selected[choice.Idx]; ok {
 			hintSymbol = s.HintSymbol // Selected!
 		}
-
+		
 		// Render the row
 		msg.NewLine().Write(s.RowRender(cursorSymbol, hintSymbol, val))
 	}
-
+	
 	if s.ShowHelp {
 		msg.NewLine().Write(s.Help.View(s.Keymap))
 	}
-
+	
 	// Send the UI for rendering
 	return msg.String()
 }
@@ -367,7 +367,7 @@ func (s *Selection) refreshChoices() {
 	var choices []SelectionItem
 	var filterChoices []SelectionItem
 	var available, ignored int
-
+	
 	// filter choice
 	if s.shouldFilter() && len(s.FilterInput.Value()) > 0 {
 		// do filter
@@ -375,23 +375,23 @@ func (s *Selection) refreshChoices() {
 	} else {
 		filterChoices = s.Choices
 	}
-
+	
 	for _, choice := range filterChoices {
 		available++
-
+		
 		if s.PageSize > 0 && len(choices) >= s.PageSize {
 			break
 		}
-
+		
 		if (s.PageSize > 0) && (ignored < s.scrollOffset) {
 			ignored++
-
+			
 			continue
 		}
-
+		
 		choices = append(choices, choice)
 	}
-
+	
 	s.currentChoices = choices
 	s.availableChoices = available
 }
@@ -401,21 +401,21 @@ func (s *Selection) viewResult() string {
 	if s.DisableOutPutResult || len(s.Selected) == 0 {
 		return ""
 	}
-
+	
 	output := s.promptLine()
-
+	
 	for i := range s.Selected {
 		output.Style(s.ValueStyle, s.Choices[i].Val).Space()
 	}
-
+	
 	output.NewLine()
-
+	
 	return output.String()
 }
 
 func (s *Selection) promptLine() *strx.FluentStringBuilder {
 	builder := strx.NewFluent()
-
+	
 	if IsFinish(s.status) {
 		builder.Style(s.UnFocusSymbolStyle, s.UnFocusSymbol).
 			Write(s.Prompt).
@@ -425,7 +425,7 @@ func (s *Selection) promptLine() *strx.FluentStringBuilder {
 			Write(s.Prompt).
 			Style(s.FocusIntervalStyle, s.FocusInterval)
 	}
-
+	
 	return builder
 }
 
@@ -434,7 +434,7 @@ func (s *Selection) moveUp() {
 	if s.shouldScrollUp() {
 		s.scrollUp()
 	}
-
+	
 	s.cursor = mathutil.Max(0, s.cursor-1)
 }
 
@@ -444,11 +444,11 @@ func (s *Selection) moveDown() {
 		s.moveToTop()
 		return
 	}
-
+	
 	if s.shouldScrollDown() {
 		s.scrollDown()
 	}
-
+	
 	s.cursor = mathutil.Min(len(s.currentChoices)-1, s.cursor+1)
 }
 
@@ -458,7 +458,7 @@ func (s *Selection) moveDown() {
 func (s *Selection) choice() {
 	// get Current choice.
 	idx := s.currentChoices[s.cursor].Idx
-
+	
 	_, ok := s.Selected[idx]
 	if ok {
 		delete(s.Selected, idx)
@@ -525,7 +525,7 @@ func (s *Selection) scrollUp() {
 	if s.PageSize <= 0 || s.scrollOffset <= 0 {
 		return
 	}
-
+	
 	s.cursor = mathutil.Min(len(s.currentChoices)-1, s.cursor+1)
 	s.scrollOffset--
 	s.refreshChoices()
@@ -535,7 +535,7 @@ func (s *Selection) scrollDown() {
 	if s.PageSize <= 0 || s.scrollOffset+s.PageSize >= s.availableChoices {
 		return
 	}
-
+	
 	s.cursor = mathutil.Max(0, s.cursor-1)
 	s.scrollOffset++
 	s.refreshChoices()
@@ -545,11 +545,11 @@ func (s *Selection) canScrollDown() bool {
 	if s.PageSize <= 0 || s.availableChoices <= s.PageSize {
 		return false
 	}
-
+	
 	if s.scrollOffset+s.PageSize >= len(s.Choices) {
 		return false
 	}
-
+	
 	return true
 }
 

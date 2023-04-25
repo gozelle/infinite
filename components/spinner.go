@@ -4,9 +4,9 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
-	"github.com/fzdwx/infinite/theme"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
+	"github.com/gozelle/infinite/theme"
 )
 
 var (
@@ -31,7 +31,7 @@ type (
 		DisableOutPutResult bool
 		Status              Status
 	}
-
+	
 	RefreshPromptMsg string
 )
 
@@ -56,7 +56,7 @@ func (s *Spinner) Init() tea.Cmd {
 		FPS:    s.Shape.FPS,
 	}
 	s.Model.Style = s.ShapeStyle.Inner()
-
+	
 	return s.Model.Tick
 }
 
@@ -82,7 +82,7 @@ func (s *Spinner) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	default:
 		return s, nil
 	}
-
+	
 	return s, nil
 }
 
@@ -95,11 +95,11 @@ func (s *Spinner) View() string {
 	viewBuilder := strx.NewFluent().
 		Write(s.Model.View()).
 		Write(s.Prompt)
-
+	
 	if s.shouldAppendNewLine() {
 		viewBuilder.NewLine()
 	}
-
+	
 	return viewBuilder.String()
 }
 

@@ -1,7 +1,7 @@
 package multiselect
 
 import (
-	"github.com/fzdwx/infinite/components"
+	"github.com/gozelle/infinite/components"
 	"github.com/rotisserie/eris"
 )
 
@@ -13,26 +13,26 @@ type Select struct {
 func New(choices []string, ops ...Option) *Select {
 	inner := components.NewSelection(choices)
 	startUp := components.NewStartUp(inner)
-
+	
 	ms := &Select{
 		inner:   inner,
 		startUp: startUp,
 	}
-
+	
 	return ms.Apply(ops...)
 }
 
 // Display startup Select
 func (ms *Select) Display(prompt ...string) ([]int, error) {
 	ms.Apply(WithPrompt(prompt...))
-
+	
 	ms.inner.RenderColor()
-
+	
 	_, err := ms.startUp.Run()
 	if err != nil {
 		return nil, eris.Wrap(err, "start inner selection fail")
 	}
-
+	
 	return ms.inner.Value(), nil
 }
 

@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/components/input/confirm"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/components/input/confirm"
 )
 
 func main() {
-
+	
 	c := inf.NewConfirm(
 		confirm.WithPure(),
 		confirm.WithDefaultYes(),
@@ -20,9 +20,9 @@ func main() {
 		//		key.WithKeys("c"))},
 		//),
 	)
-
+	
 	c.Display()
-
+	
 	if c.Value() {
 		fmt.Println("yes, you are.")
 	} else {

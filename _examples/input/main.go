@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/components/input/text"
-	"github.com/fzdwx/infinite/theme"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/components/input/text"
+	"github.com/gozelle/infinite/theme"
 )
 
 func main() {
-
+	
 	i := inf.NewText(
 		text.WithPrompt("what's your name ?"),
 		text.WithPromptStyle(theme.DefaultTheme.PromptStyle),
@@ -33,8 +33,8 @@ func main() {
 	//}()
 	//
 	//time.Sleep(time.Second * 11)
-
+	
 	_, _ = i.Display()
-
+	
 	fmt.Printf("you input: %s\n", i.Value())
 }

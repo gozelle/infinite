@@ -3,20 +3,20 @@ package main
 import (
 	"fmt"
 	"time"
-
+	
 	"github.com/duke-git/lancet/v2/random"
 	"github.com/duke-git/lancet/v2/strutil"
-	inf "github.com/fzdwx/infinite"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/components/selection/confirm"
-	"github.com/fzdwx/infinite/components/selection/multiselect"
-	"github.com/fzdwx/infinite/components/spinner"
-	"github.com/fzdwx/infinite/style"
+	inf "github.com/gozelle/infinite"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/components/selection/confirm"
+	"github.com/gozelle/infinite/components/selection/multiselect"
+	"github.com/gozelle/infinite/components/spinner"
+	"github.com/gozelle/infinite/style"
 )
 
 func main() {
-
+	
 	options := []string{
 		"周杰伦-稻香",
 		"周杰伦-晴天",
@@ -34,7 +34,7 @@ func main() {
 		"新裤子乐队-没有理想的人不伤心",
 		"哪吒乐队-闹海",
 	}
-
+	
 	inf.NewSpinner(
 		spinner.WithPrompt(" Loading..."),
 		spinner.WithDisableOutputResult(),
@@ -42,24 +42,24 @@ func main() {
 		time.Sleep(time.Millisecond * 100 * 12)
 		spinner.Info("共找到 %d 首歌", len(options))
 	})
-
+	
 	input := components.NewInput()
 	input.Prompt = "Filtering: "
 	input.PromptStyle = style.New().Bold().Italic().Fg(color.LightBlue)
-
+	
 	selected, _ := inf.NewMultiSelect(options,
 		multiselect.WithFilterInput(input),
 		multiselect.WithPageSize(1),
 	).Display("请选择你要下载的歌曲")
-
+	
 	yes, _ := inf.NewConfirmWithSelection(
 		confirm.WithPrompt(fmt.Sprintf("请问你是否要下载这 %d 首歌", len(selected))),
 	).Display()
-
+	
 	if !yes {
 		return
 	}
-
+	
 	inf.NewProgressGroup(len(selected)).
 		AppendRunner(func(progress *components.Progress) func() {
 			title := strutil.After(options[selected[progress.Id-1]], "-")
@@ -80,7 +80,7 @@ func main() {
 				}
 			}
 		}).Display()
-
+	
 }
 
 func sleep() {

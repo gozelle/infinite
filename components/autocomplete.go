@@ -4,7 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/duke-git/lancet/v2/strutil"
-	"github.com/fzdwx/infinite/pkg/strx"
+	"github.com/gozelle/infinite/pkg/strx"
 	"strings"
 )
 
@@ -35,11 +35,11 @@ func (a AutocompleteValCtx) CursorVal() string {
 	if len(a.Value) == 0 {
 		return strx.Empty
 	}
-
-	// fix https://github.com/fzdwx/infinite/issues/9
+	
+	// fix https://github.com/gozelle/infinite/issues/9
 	values := strings.Split(a.Value, strx.Empty)
 	cursorVal := strings.Join(values[:a.Cursor], strx.Empty)
-
+	
 	return cursorVal
 }
 
@@ -50,7 +50,7 @@ func (a AutocompleteValCtx) CursorWord() string {
 	if length == 0 {
 		return strx.Empty
 	}
-
+	
 	return ex[length-1]
 }
 
@@ -109,7 +109,7 @@ func DefaultSelectionCreator(suggester []string, a *Autocomplete) *Selection {
 	selection.RowRender = func(CursorSymbol string, HintSymbol string, choice string) string {
 		return choice
 	}
-
+	
 	return selection
 }
 
@@ -117,14 +117,14 @@ func DefaultCompleter() Completer {
 	return func(valCtx AutocompleteValCtx, choiceWord string) (newVal string, newCursor int) {
 		cursorVal := valCtx.CursorVal()
 		cursorWord := valCtx.CursorWord()
-
+		
 		cursorValSplit := strutil.SplitEx(cursorVal, strx.Space, false)
 		cursorValSplitLen := len(cursorValSplit)
-
+		
 		// replace word
 		cursorValSplit[cursorValSplitLen-1] = choiceWord
 		newCursorVal := strx.NewFluent().Join(cursorValSplit, strx.Space).String()
-
+		
 		// replace val
 		newVal = strings.Replace(valCtx.Value, cursorVal, newCursorVal, 1)
 		newCursor = valCtx.Cursor + (len(choiceWord) - len(cursorWord))
@@ -137,7 +137,7 @@ func NewLineSuggestionRender(suggestionItems []string, a *Autocomplete) string {
 		if len(item) == 0 {
 			return strx.Empty
 		}
-
+		
 		return strx.NewFluent().Space(a.Padding + a.Input.Cursor()).Write(item).NewLine().String()
 	}).String()
 }
@@ -147,7 +147,7 @@ func TabSuggestionRender(suggestionItems []string, a *Autocomplete) string {
 		if len(item) == 0 {
 			return strx.Empty
 		}
-
+		
 		return strx.NewFluent().Write(item).Space(4).String()
 	}).String()
 }
@@ -160,7 +160,7 @@ type Autocomplete struct {
 	KeyMap               AutocompleteKeyMap
 	SelectionCreator     func(options []string, a *Autocomplete) *Selection
 	SuggestionViewRender func(suggestionItems []string, a *Autocomplete) string
-
+	
 	Padding int
 	Program *tea.Program
 	*PrintHelper
@@ -176,7 +176,7 @@ func (a *Autocomplete) Value() string {
 
 func (a *Autocomplete) Init() tea.Cmd {
 	cmd := a.Input.Init()
-
+	
 	a.Padding = len(a.Input.Prompt)
 	return cmd
 }
@@ -199,7 +199,7 @@ func (a *Autocomplete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case a.shouldComplete(msg):
 			a.complete()
 		}
-
+		
 		// on input text, show selection.
 		switch msg.Type {
 		case tea.KeyRunes:
@@ -208,7 +208,7 @@ func (a *Autocomplete) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			a.ShowSelection = false
 		}
 	}
-
+	
 	// update Input line
 	_, cmd := a.Input.Update(msg)
 	return a, cmd
@@ -231,7 +231,7 @@ func (a *Autocomplete) suggesterView(fluent *strx.FluentStringBuilder) {
 	if a.Suggester == nil || a.ShowSelection == false {
 		return
 	}
-
+	
 	if a.ShouldNewSelection {
 		suggester, ok := a.Suggester(a.getValCtx())
 		if !ok || len(suggester) == 0 {
@@ -239,7 +239,7 @@ func (a *Autocomplete) suggesterView(fluent *strx.FluentStringBuilder) {
 		}
 		a.Selection = a.SelectionCreator(suggester, a)
 	}
-
+	
 	if a.Selection != nil {
 		fluent.NewLine().Write(a.SuggestionViewRender(strings.Split(a.Selection.View(), strx.NewLine), a))
 	}
@@ -249,16 +249,16 @@ func (a *Autocomplete) complete() {
 	if a.Selection == nil {
 		return
 	}
-
+	
 	// get complete word
 	a.Selection.choice()
 	choiceWord := a.Selection.Choices[a.Selection.Value()[0]].Val
-
+	
 	newVal, newCursor := a.Completer(a.getValCtx(), choiceWord)
-
+	
 	a.Input.Model.SetValue(newVal)
 	a.Input.Model.SetCursor(newCursor)
-
+	
 	a.ShouldNewSelection = true
 	a.Selection = nil
 }
@@ -266,7 +266,7 @@ func (a *Autocomplete) complete() {
 func (a *Autocomplete) movedSelection(msg tea.KeyMsg) {
 	a.ShowSelection = true
 	a.ShouldNewSelection = false
-
+	
 	switch {
 	case key.Matches(msg, a.KeyMap.Up):
 		a.Selection.moveUp()

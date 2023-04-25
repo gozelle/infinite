@@ -4,9 +4,9 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/pkg/strx"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/pkg/strx"
+	"github.com/gozelle/infinite/style"
 	"time"
 )
 
@@ -59,12 +59,12 @@ type (
 		cleanId         int
 		FocusPrompt     string
 		UnFocusPrompt   string
-
+		
 		OutputResult             bool
 		Required                 bool
 		RequiredMsg              string
 		RequiredMsgKeepAliveTime time.Duration
-
+		
 		BlinkSpeed    time.Duration
 		Status        Status
 		EchoMode      EchoMode
@@ -72,23 +72,23 @@ type (
 		// CharLimit is the maximum amount of characters this Input element will
 		// accept. If 0 or less, there's no limit.
 		CharLimit int
-
+		
 		Prompt       string
 		DefaultValue string
-
+		
 		PromptStyle       *style.Style
 		DefaultValueStyle *style.Style
-
+		
 		FocusSymbol     string
 		UnFocusSymbol   string
 		FocusInterval   string
 		UnFocusInterval string
-
+		
 		FocusSymbolStyle     *style.Style
 		UnFocusSymbolStyle   *style.Style
 		FocusIntervalStyle   *style.Style
 		UnFocusIntervalStyle *style.Style
-
+		
 		TextStyle       *style.Style
 		BackgroundStyle *style.Style
 		CursorStyle     *style.Style
@@ -111,11 +111,11 @@ func (i *Input) Blur() {
 // Value returns the value of the text Input.
 func (i *Input) Value() string {
 	value := i.Model.Value()
-
+	
 	if len(value) == 0 {
 		value = i.DefaultValue
 	}
-
+	
 	return value
 }
 
@@ -180,13 +180,13 @@ func (i *Input) Init() tea.Cmd {
 		Style(i.PromptStyle, i.Prompt).
 		Style(i.FocusIntervalStyle, i.FocusInterval).
 		String()
-
+	
 	i.UnFocusPrompt = strx.NewFluent().
 		Style(i.UnFocusSymbolStyle, i.UnFocusSymbol).
 		Style(i.PromptStyle, i.Prompt).
 		Style(i.UnFocusIntervalStyle, i.UnFocusInterval).
 		String()
-
+	
 	i.Model.Prompt = i.FocusPrompt
 	i.Model.Placeholder = i.DefaultValue
 	i.Model.Cursor.BlinkSpeed = i.BlinkSpeed
@@ -197,7 +197,7 @@ func (i *Input) Init() tea.Cmd {
 	i.Model.PlaceholderStyle = i.DefaultValueStyle.Inner()
 	i.Model.CursorStyle = i.CursorStyle.Inner()
 	i.Model.CharLimit = i.CharLimit
-
+	
 	return tea.Batch(textinput.Blink, func() tea.Msg {
 		return i.Status
 	})
@@ -205,10 +205,10 @@ func (i *Input) Init() tea.Cmd {
 
 func (i *Input) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
-
+	
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-
+		
 		switch {
 		case key.Matches(msg, i.KeyMap.Confirm):
 			// todo Verification function can be added
@@ -229,25 +229,25 @@ func (i *Input) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case cleanRequired:
 		i.cleanRequiredMsg(msg)
 	}
-
+	
 	model, modelCmd := i.Model.Update(msg)
 	i.Model = model
 	cmds = append(cmds, modelCmd)
-
+	
 	return i, tea.Batch(cmds...)
 }
 
 func (i *Input) View() string {
 	builder := strx.NewFluent().Write(i.Model.View())
-
+	
 	if i.showRequiredMsg {
 		builder.NewLine().Write(i.RequiredMsg)
 	}
-
+	
 	if IsFinish(i.Status) && i.OutputResult {
 		builder.NewLine()
 	}
-
+	
 	return builder.String()
 }
 
@@ -262,7 +262,7 @@ func (i *Input) confirm() (tea.Model, tea.Cmd) {
 		i.cleanId++
 		return i, tea.Tick(i.RequiredMsgKeepAliveTime, cleanRequiredMsg(i.cleanId))
 	}
-
+	
 	return i.finish()
 }
 

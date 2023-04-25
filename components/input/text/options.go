@@ -1,8 +1,8 @@
 package text
 
 import (
-	"github.com/fzdwx/infinite/components"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/components"
+	"github.com/gozelle/infinite/style"
 	"time"
 )
 
@@ -76,7 +76,7 @@ func WithEchoNone() Option {
 func WithEchoPassword(maskedSymbol ...rune) Option {
 	return func(i *Text) {
 		i.inner.EchoMode = components.EchoPassword
-
+		
 		if len(maskedSymbol) <= 0 {
 			return
 		}

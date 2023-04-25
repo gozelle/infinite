@@ -4,8 +4,8 @@ import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/fzdwx/infinite/color"
-	"github.com/fzdwx/infinite/style"
+	"github.com/gozelle/infinite/color"
+	"github.com/gozelle/infinite/style"
 )
 
 // default prefix
@@ -15,7 +15,7 @@ var (
 	PrefixWarn  = style.New().Fg(color.Orange).Render("WARN ")
 	PrefixInfo  = style.New().Fg(color.Special).Render("INFO ")
 	PrefixDebug = style.New().Fg(color.Gray).Render("DEBUG ")
-
+	
 	PrefixSuccess = style.New().Fg(color.Special).Render("SUCCESS ")
 	PrefixFailed  = style.New().Fg(color.Red).Render("FAILED ")
 )
