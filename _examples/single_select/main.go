@@ -22,14 +22,25 @@ func main() {
 	selectKeymap := singleselect.DefaultSingleKeyMap()
 	selectKeymap.Confirm = key.NewBinding(
 		key.WithKeys("enter"),
+		key.WithHelp("enter", "finish select"),
 	)
 	selectKeymap.Choice = key.NewBinding(
 		key.WithKeys("enter"),
+		key.WithHelp("enter", "finish select"),
+	)
+	selectKeymap.NextPage = key.NewBinding(
+		key.WithKeys("right"),
+		key.WithHelp("->", "next page"),
+	)
+	selectKeymap.PrevPage = key.NewBinding(
+		key.WithKeys("left"),
+		key.WithHelp("<-", "prev page"),
 	)
 	selected, err := inf.NewSingleSelect(
 		options,
 		singleselect.WithDisableFilter(),
 		singleselect.WithKeyBinding(selectKeymap),
+		singleselect.WithPageSize(5),
 	).Display("Hello world")
 	
 	if err == nil {

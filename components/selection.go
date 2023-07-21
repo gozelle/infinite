@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/paginator"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/duke-git/lancet/v2/mathutil"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/duke-git/lancet/v2/strutil"
+	"github.com/fzdwx/iter"
+	"github.com/fzdwx/iter/mapx"
+	"github.com/fzdwx/iter/stream"
 	"github.com/gozelle/infinite/color"
 	"github.com/gozelle/infinite/pkg/strx"
 	"github.com/gozelle/infinite/style"
@@ -54,7 +58,7 @@ func DefaultMultiKeyMap() SelectionKeyMap {
 		),
 		Confirm: key.NewBinding(
 			key.WithKeys("enter"),
-			key.WithHelp("enter", "finish selection"),
+			key.WithHelp("enter", "finish select"),
 		),
 		SelectAll: key.NewBinding(
 			key.WithKeys("right"),
@@ -101,7 +105,22 @@ type SelectionKeyMap struct {
 	PrevPage key.Binding
 }
 
+func keyBindMatch(a key.Binding, b key.Binding) bool {
+	a1Map := stream.ToMap2[string, string](iter.Stream(a.Keys()), func(s string) string {
+		return s
+	})
+	
+	b1Map := stream.ToMap2[string, string](iter.Stream(b.Keys()), func(s string) string {
+		return s
+	})
+	
+	return mapx.EqDefault(a1Map, b1Map)
+}
+
 func (k SelectionKeyMap) ShortHelp() []key.Binding {
+	if keyBindMatch(k.Choice, k.Confirm) {
+		return []key.Binding{k.Up, k.Down, k.Choice, k.Quit}
+	}
 	return []key.Binding{k.Up, k.Down, k.Choice, k.Confirm, k.Quit}
 }
 
@@ -114,23 +133,19 @@ func (k SelectionKeyMap) FullHelp() [][]key.Binding {
 
 type Selection struct {
 	// result
-	Selected map[int]struct{}
+	Selected map[int]bool
 	// Current cursor index in currentChoices
 	cursor int
-	// the offset of screen
-	scrollOffset int
-	// usually len(currentChoices)
-	availableChoices int
 	// currently valid option
 	currentChoices []SelectionItem
 	program        *tea.Program
 	
-	Choices []SelectionItem
+	ShowPaginator bool // default true
+	Paginator     paginator.Model
+	Choices       []SelectionItem
 	
-	Validators       []Validator
-	validatorsErrMsg []string
-	// how many options to display at a time
-	PageSize            int
+	Validators          []Validator
+	validatorsErrMsg    []string
 	DisableOutPutResult bool
 	
 	// key binding
@@ -193,7 +208,7 @@ func DefaultFilterFunc(input string, items []SelectionItem) []SelectionItem {
 func (s *Selection) Init() tea.Cmd {
 	var cmd tea.Cmd
 	
-	s.refreshChoices()
+	s.RefreshChoices()
 	
 	s.UnCursorSymbol = strutil.PadEnd("", runewidth.StringWidth(s.CursorSymbol), " ")
 	
@@ -209,31 +224,27 @@ func (s *Selection) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		
-		// 关于为什么不用 switch, 为了适配单选的key 和 choice 和 confirm 这两个key要相同.
+		/**
+		  关于为什么不用 switch, 为了适配单选的key 和 choice 和 confirm 这两个key要相同.
+		*/
 		
 		if key.Matches(msg, s.Keymap.Up) {
 			s.moveUp()
 			shouldSkipFiler = true
 		}
-		
 		if key.Matches(msg, s.Keymap.Down) {
 			s.moveDown()
 			shouldSkipFiler = true
 		}
 		
 		if key.Matches(msg, s.Keymap.NextPage) {
-			for i := 0; i < s.PageSize; i++ {
-				s.moveDown()
-			}
+			s.Paginator.NextPage()
+			s.checkCursor()
 			shouldSkipFiler = true
 		}
-		str := msg.String()
-		_ = str == ""
 		if key.Matches(msg, s.Keymap.PrevPage) {
-			for i := 0; i < s.PageSize; i++ {
-				s.moveUp()
-			}
+			s.Paginator.PrevPage()
+			s.checkCursor()
 			shouldSkipFiler = true
 		}
 		
@@ -309,8 +320,10 @@ func (s *Selection) View() string {
 		msg.NewLine().Write(s.Header)
 	}
 	
+	s.Paginator.SetTotalPages(len(s.currentChoices))
+	start, end := s.Paginator.GetSliceBounds(len(s.currentChoices))
 	// Iterate over our Choices
-	for i, choice := range s.currentChoices {
+	for i, choice := range s.currentChoices[start:end] {
 		val := choice.Val
 		
 		// Is the CursorSymbol pointing at this choice?
@@ -330,6 +343,10 @@ func (s *Selection) View() string {
 		msg.NewLine().Write(s.RowRender(cursorSymbol, hintSymbol, val))
 	}
 	
+	if s.ShowPaginator {
+		msg.NewLine().Write(s.Paginator.View())
+	}
+	
 	if s.ShowHelp {
 		msg.NewLine().Write(s.Help.View(s.Keymap))
 	}
@@ -343,6 +360,11 @@ func (s *Selection) SetProgram(program *tea.Program) {
 	if s.shouldFilter() {
 		s.FilterInput.SetProgram(program)
 	}
+}
+
+// SetPageSize set page size
+func (s *Selection) SetPageSize(pageSize int) {
+	s.Paginator.PerPage = pageSize
 }
 
 // Value get all Selected
@@ -362,11 +384,9 @@ func (s *Selection) RenderColor() {
 	s.UnHintSymbol = s.UnHintSymbolStyle.Render(s.UnHintSymbol)
 }
 
-// refreshChoices refresh Choices
-func (s *Selection) refreshChoices() {
-	var choices []SelectionItem
+// RefreshChoices refresh Choices
+func (s *Selection) RefreshChoices() {
 	var filterChoices []SelectionItem
-	var available, ignored int
 	
 	// filter choice
 	if s.shouldFilter() && len(s.FilterInput.Value()) > 0 {
@@ -376,24 +396,7 @@ func (s *Selection) refreshChoices() {
 		filterChoices = s.Choices
 	}
 	
-	for _, choice := range filterChoices {
-		available++
-		
-		if s.PageSize > 0 && len(choices) >= s.PageSize {
-			break
-		}
-		
-		if (s.PageSize > 0) && (ignored < s.scrollOffset) {
-			ignored++
-			
-			continue
-		}
-		
-		choices = append(choices, choice)
-	}
-	
-	s.currentChoices = choices
-	s.availableChoices = available
+	s.currentChoices = filterChoices
 }
 
 // viewResult get result
@@ -445,32 +448,38 @@ func (s *Selection) moveDown() {
 		return
 	}
 	
+	// next page
 	if s.shouldScrollDown() {
 		s.scrollDown()
+		s.cursor = 0
+	} else {
+		s.cursor = mathutil.Min(len(s.currentChoices)-1, s.cursor+1)
 	}
 	
-	s.cursor = mathutil.Min(len(s.currentChoices)-1, s.cursor+1)
 }
 
 // choice
 // The "enter" key and the spacebar (a literal space) toggle
 // the Selected state for the SelectionItem that the cursor is pointing at.
 func (s *Selection) choice() {
+	s.Paginator.SetTotalPages(len(s.currentChoices))
+	start, end := s.Paginator.GetSliceBounds(len(s.currentChoices))
+	
 	// get Current choice.
-	idx := s.currentChoices[s.cursor].Idx
+	idx := s.currentChoices[start:end][s.cursor].Idx
 	
 	_, ok := s.Selected[idx]
 	if ok {
 		delete(s.Selected, idx)
 	} else {
-		s.Selected[idx] = struct{}{}
+		s.Selected[idx] = true
 	}
 }
 
 // selectAll add all item to Selected
 func (s *Selection) selectAll() {
 	for _, choice := range s.Choices {
-		s.Selected[choice.Idx] = struct{}{}
+		s.Selected[choice.Idx] = true
 	}
 }
 
@@ -488,7 +497,7 @@ func (s *Selection) flip() {
 		if ok {
 			delete(s.Selected, choice.Idx)
 		} else {
-			s.Selected[choice.Idx] = struct{}{}
+			s.Selected[choice.Idx] = true
 		}
 	}
 }
@@ -499,14 +508,19 @@ func (s *Selection) finish() (tea.Model, tea.Cmd) {
 	return s, tea.Quit
 }
 
-// shouldMoveToTop should move to top?
+// shouldMoveToTop should go to page 0?
 func (s *Selection) shouldMoveToTop() bool {
-	return (s.cursor + s.scrollOffset) == (len(s.Choices) - 1)
+	if s.Paginator.OnLastPage() == false {
+		return false
+	}
+	
+	// cursor * page size * page == total items length
+	return s.Paginator.Page*s.Paginator.PerPage+s.cursor == len(s.currentChoices)-1
 }
 
 // shouldScrollDown should scroll down?
 func (s *Selection) shouldScrollDown() bool {
-	return s.cursor == len(s.currentChoices)-1 && s.canScrollDown()
+	return s.cursor == (s.Paginator.PerPage-1) && s.canScrollDown()
 }
 
 // shouldScrollUp should scroll up?
@@ -517,44 +531,31 @@ func (s *Selection) shouldScrollUp() bool {
 // moveToTop  move cursor to top
 func (s *Selection) moveToTop() {
 	s.cursor = 0
-	s.scrollOffset = 0
-	s.refreshChoices()
+	s.Paginator.Page = 0
+	s.RefreshChoices()
 }
 
 func (s *Selection) scrollUp() {
-	if s.PageSize <= 0 || s.scrollOffset <= 0 {
-		return
-	}
-	
-	s.cursor = mathutil.Min(len(s.currentChoices)-1, s.cursor+1)
-	s.scrollOffset--
-	s.refreshChoices()
+	s.Paginator.PrevPage()
+	s.RefreshChoices()
 }
 
 func (s *Selection) scrollDown() {
-	if s.PageSize <= 0 || s.scrollOffset+s.PageSize >= s.availableChoices {
+	if s.Paginator.PerPage <= 0 {
 		return
 	}
 	
 	s.cursor = mathutil.Max(0, s.cursor-1)
-	s.scrollOffset++
-	s.refreshChoices()
+	s.Paginator.NextPage()
+	s.RefreshChoices()
 }
 
 func (s *Selection) canScrollDown() bool {
-	if s.PageSize <= 0 || s.availableChoices <= s.PageSize {
-		return false
-	}
-	
-	if s.scrollOffset+s.PageSize >= len(s.Choices) {
-		return false
-	}
-	
-	return true
+	return s.Paginator.OnLastPage() == false
 }
 
 func (s *Selection) canScrollUp() bool {
-	return s.scrollOffset > 0
+	return s.Paginator.Page != 0
 }
 
 func (s *Selection) shouldFilter() bool {
@@ -567,4 +568,12 @@ func (s *Selection) shouldShowValidatorsErrMsg() bool {
 
 func (s *Selection) clearValidatorsErrMsg() {
 	s.validatorsErrMsg = []string{}
+}
+
+func (s *Selection) checkCursor() {
+	start, end := s.Paginator.GetSliceBounds(len(s.currentChoices))
+	items := s.currentChoices[start:end]
+	if s.cursor >= len(items) {
+		s.cursor = len(items) - 1
+	}
 }

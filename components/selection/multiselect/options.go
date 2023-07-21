@@ -1,6 +1,7 @@
 package multiselect
 
 import (
+	"github.com/charmbracelet/bubbles/paginator"
 	"github.com/gozelle/infinite/components"
 	"github.com/gozelle/infinite/style"
 )
@@ -43,7 +44,7 @@ func WithRowRender(rowRender func(string, string, string) string) Option {
 // WithPageSize default is 5
 func WithPageSize(pageSize int) Option {
 	return func(s *Select) {
-		s.inner.PageSize = pageSize
+		s.inner.SetPageSize(pageSize)
 	}
 }
 
@@ -219,5 +220,19 @@ func WithValidator(v components.Validator) Option {
 func WithDisableShowHelp() Option {
 	return func(s *Select) {
 		s.inner.ShowHelp = false
+	}
+}
+
+// WithPaginator set paginator.
+func WithPaginator(pager paginator.Model) Option {
+	return func(s *Select) {
+		s.inner.Paginator = pager
+	}
+}
+
+// WithHiddenPaginator hidden paginator view.
+func WithHiddenPaginator() Option {
+	return func(s *Select) {
+		s.inner.ShowPaginator = false
 	}
 }

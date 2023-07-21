@@ -1,8 +1,12 @@
 package components
 
 import (
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/paginator"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/duke-git/lancet/v2/slice"
 	"github.com/gozelle/infinite/style"
 	"github.com/gozelle/infinite/theme"
@@ -61,7 +65,6 @@ func NewInput() *Input {
 		DefaultValueStyle:        InputDefaultPlaceholderStyle,
 		PromptStyle:              InputDefaultPromptStyle,
 		TextStyle:                InputDefaultTextStyle,
-		BackgroundStyle:          InputDefaultBackgroundStyle,
 		CursorStyle:              InputDefaultCursorStyle,
 		FocusSymbolStyle:         style.New(),
 		UnFocusSymbolStyle:       style.New(),
@@ -101,16 +104,27 @@ func NewProgress() *Progress {
 	return p
 }
 
+func newDefaultPager() paginator.Model {
+	model := paginator.New()
+	p := paginator.New()
+	p.Type = paginator.Dots
+	p.ActiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "235", Dark: "252"}).Render("•")
+	p.InactiveDot = lipgloss.NewStyle().Foreground(lipgloss.AdaptiveColor{Light: "250", Dark: "238"}).Render("•")
+	p.PerPage = SelectionDefaultPageSize
+	return model
+}
+
 // NewSelection constructor
 func NewSelection(choices []string) *Selection {
-	
 	items := slice.Map[string, SelectionItem](choices, func(idx int, item string) SelectionItem {
 		return SelectionItem{idx, item}
 	})
 	
 	c := &Selection{
+		Paginator:            newDefaultPager(),
+		ShowPaginator:        true,
 		Choices:              items,
-		Selected:             make(map[int]struct{}),
+		Selected:             make(map[int]bool),
 		CursorSymbol:         SelectionDefaultCursorSymbol,
 		UnCursorSymbol:       SelectionDefaultUnCursorSymbol,
 		CursorSymbolStyle:    SelectionDefaultCursorSymbolStyle,
@@ -122,7 +136,6 @@ func NewSelection(choices []string) *Selection {
 		UnHintSymbol:         SelectionDefaultUnHintSymbol,
 		UnHintSymbolStyle:    SelectionDefaultUnHintSymbolStyle,
 		DisableOutPutResult:  SelectionDefaultDisableOutPutResult,
-		PageSize:             SelectionDefaultPageSize,
 		Keymap:               DefaultMultiKeyMap(),
 		Help:                 SelectionDefaultHelp,
 		RowRender:            SelectionDefaultRowRender,
@@ -156,5 +169,31 @@ func NewSpinner() *Spinner {
 		Status:              SpinnerDefaultStatus,
 		Quit:                InterruptKey,
 	}
+	return c
+}
+
+// NewSelectionWithList WIP
+func NewSelectionWithList[T list.DefaultItem](items []T) *SelectionWithList[T] {
+	keymap := &SelectionWithListKeyMap{
+		Choice: key.NewBinding(
+			key.WithKeys("tab"),
+		),
+	}
+	del := &selectionWithListDelegate[T]{
+		height:   2,
+		spacing:  1,
+		Selected: make(map[string]list.DefaultItem),
+		Styles:   list.NewDefaultItemStyles(),
+	}
+
+	listModel := list.New([]list.Item{}, del, 0, 0)
+
+	c := &SelectionWithList[T]{
+		del:    del,
+		List:   &listModel,
+		KeyMap: keymap,
+	}
+
+	c.SetItems(items)
 	return c
 }
